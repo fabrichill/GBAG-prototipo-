@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBAG - Get Better At Games</title>
+    <!-- Fuentes: Teko (Logo), Orbitron (Títulos), Inter (Textos) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        teko: ['Teko', 'sans-serif'],
+                    },
+                    colors: {
+                        bgMain: '#050505',
+                        cardBg: '#111111',
+                        accent: '#00ff88',
+                        accentPurple: '#7000ff',
+                        textMain: '#ffffff',
+                        textMuted: '#888888'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .hide-scroll::-webkit-scrollbar {
+                display: none;
+            }
+            .hide-scroll {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7000ff; }
+
+        /* Logo Premium Animado */
+        .logo-title {
+            background: linear-gradient(45deg, #00ff88, #7000ff, #00ff88, #7000ff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientFlow 3s ease infinite;
+            /* Brillo sutil premium, adiós al 3D barato */
+            filter: drop-shadow(0 0 12px rgba(112, 0, 255, 0.4));
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .game-card-hover:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px -5px rgba(112, 0, 255, 0.3);
+            border-color: #7000ff;
+        }
+
+        .game-details-overlay {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        .game-card-hover:hover .game-details-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Evitar arrastre nativo de imágenes en el carrusel */
+        .pro-card img {
+            pointer-events: none;
+            user-select: none;
+        }
+        
+        /* Cursor agarrando para el carrusel */
+        .cursor-grab { cursor: grab; }
+        .cursor-grabbing { cursor: grabbing !important; }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-accentPurple selection:text-white relative bg-[#050505] text-white min-h-screen">
+
+    <!-- Efectos de Luces de Fondo -->
+    <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#7000ff]/10 blur-[120px] rounded-full"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#00ff88]/10 blur-[120px] rounded-full"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Logo Modernizado -->
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="showView('home-view')">
+                <h1 class="logo-title font-orbitron text-4xl md:text-5xl tracking-widest font-black">GBAG</h1>
+                <span class="bg-white/5 text-accent text-xs font-bold px-2 py-1 rounded border border-accent/20 hidden sm:block mt-1">GET BETTER AT GAMES</span>
+            </div>
+            
+            <button id="btn-back" onclick="showView('home-view')" class="hidden bg-white/5 hover:bg-white/10 text-white font-semibold py-2 px-4 rounded-lg border border-white/10 transition flex items-center gap-2">
+                <span>←</span> Volver a Juegos
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-10">
+
+        <div id="home-view" class="view-section active">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16 pt-8">
+                <h2 class="font-orbitron text-5xl md:text-6xl font-black mb-6 leading-tight">DOMINA EL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accentPurple">COMPETITIVO</span></h2>
+                <p class="text-textMuted text-lg md:text-xl">Selecciona tu campo de batalla. Descubre las mecánicas, rutinas de entrenamiento y optimizaciones exactas que usan los profesionales para ganar.</p>
+            </div>
+
+            <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-24">
+                <!-- Se inyecta por JS -->
+            </div>
+
+            <div class="mb-10 p-8 rounded-3xl relative overflow-hidden">
+                <div class="flex flex-col md:flex-row items-center justify-between mb-8 border-b border-white/10 pb-4 relative z-10">
+                    <div>
+                        <h3 class="font-orbitron text-3xl font-bold text-white flex items-center gap-3 justify-center md:justify-start">
+                            <span class="text-accentPurple">🏆</span> Salón de la Fama
+                        </h3>
+                        <p class="text-textMuted text-sm mt-1 text-center md:text-left">Los reyes de cada disciplina. Cartas de colección de los mejores del mundo.</p>
+                    </div>
+                    <div class="flex gap-2 mt-4 md:mt-0">
+                        <button id="prev-pro" class="w-12 h-12 rounded-full bg-cardBg border border-white/10 flex items-center justify-center hover:bg-white/10 hover:text-accent transition text-xl shadow-lg z-20 relative">
+                            ←
+                        </button>
+                        <button id="next-pro" class="w-12 h-12 rounded-full bg-cardBg border border-white/10 flex items-center justify-center hover:bg-white/10 hover:text-accent transition text-xl shadow-lg z-20 relative">
+                            →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Carrusel Cortina 3D -->
+                <div class="relative w-full py-8 z-10" style="perspective: 1200px;">
+                    <div id="hall-of-fame-carousel" class="flex gap-4 overflow-x-auto snap-x snap-mandatory hide-scroll items-center pb-12 pt-8" style="transform-style: preserve-3d;">
+                        <!-- Se inyecta por JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-detail-view" class="view-section">
+            
+            <div class="relative h-[300px] md:h-[450px] rounded-3xl overflow-hidden mb-10 border border-white/10 shadow-2xl">
+                <div id="detail-banner" class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/70 to-transparent"></div>
+                
+                <div class="absolute bottom-0 left-0 p-8 md:p-12 w-full">
+                    <h2 id="detail-title" class="font-orbitron text-5xl md:text-7xl font-black text-white drop-shadow-lg mb-4">Título</h2>
+                    <p id="detail-desc" class="text-gray-300 max-w-3xl text-lg md:text-xl font-medium drop-shadow"></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+                <div class="bg-cardBg rounded-2xl p-8 border border-white/5 hover:border-accent/30 transition shadow-lg">
+                    <h3 class="font-orbitron text-xl font-bold text-accent mb-6 flex items-center gap-3">
+                        <span class="text-2xl">🎯</span> Calentamiento
+                    </h3>
+                    <ul id="guide-warmup" class="space-y-4 text-gray-400 text-sm md:text-base list-none"></ul>
+                </div>
+
+                <div class="bg-cardBg rounded-2xl p-8 border border-white/5 hover:border-accentPurple/30 transition shadow-lg">
+                    <h3 class="font-orbitron text-xl font-bold text-accentPurple mb-6 flex items-center gap-3">
+                        <span class="text-2xl">⚡</span> Mecánicas Clave
+                    </h3>
+                    <ul id="guide-mechanics" class="space-y-4 text-gray-400 text-sm md:text-base list-none"></ul>
+                </div>
+
+                <div class="bg-cardBg rounded-2xl p-8 border border-white/5 hover:border-white/20 transition shadow-lg">
+                    <h3 class="font-orbitron text-xl font-bold text-white mb-6 flex items-center gap-3">
+                        <span class="text-2xl">⚙️</span> Optimización
+                    </h3>
+                    <ul id="guide-optimization" class="space-y-4 text-gray-400 text-sm md:text-base list-none"></ul>
+                </div>
+            </div>
+
+            <h3 class="font-orbitron text-3xl font-bold text-white mb-6 border-b border-white/10 pb-4 mt-12 flex items-center gap-3">
+                <span class="text-accentPurple">🏆</span> Referentes Competitivos
+            </h3>
+            <div id="game-pros-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                <!-- Se inyecta por JS -->
+            </div>
+
+            <h3 class="font-orbitron text-3xl font-bold text-white mb-6 border-b border-white/10 pb-4 mt-12 flex items-center gap-3">
+                <span class="text-accent">🎥</span> Video Guías de Pros
+            </h3>
+            <div id="game-videos-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <!-- Se inyecta por JS -->
+            </div>
+
+        </div>
+
+        <!-- NUEVA VISTA: DETALLE DEL PRO PLAYER -->
+        <div id="pro-detail-view" class="view-section">
+            <div class="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden mb-10 border border-white/10 shadow-2xl flex items-end">
+                <img id="pro-detail-image" src="" alt="" class="absolute inset-0 w-full h-full object-cover filter brightness-[0.4]">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent"></div>
+                
+                <div class="relative z-10 p-8 md:p-12 w-full flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
+                    <div class="text-center md:text-left">
+                        <p id="pro-detail-game" class="text-accent font-bold uppercase tracking-widest mb-2 shadow-black drop-shadow-md"></p>
+                        <h2 id="pro-detail-name" class="font-orbitron text-5xl md:text-7xl font-black text-white drop-shadow-lg mb-2">Nombre</h2>
+                        <p class="text-gray-300 text-lg md:text-xl font-medium drop-shadow flex items-center justify-center md:justify-start gap-2">
+                            <span class="w-3 h-3 rounded-full bg-accentPurple"></span> <span id="pro-detail-stat-text"></span>
+                        </p>
+                    </div>
+                    <div class="text-center md:text-right bg-[#111111]/80 backdrop-blur-md border border-white/10 p-5 rounded-2xl shadow-xl">
+                        <span class="text-xs text-textMuted uppercase font-bold tracking-wider block mb-1">Ganancias Totales</span>
+                        <span id="pro-detail-earnings" class="font-black text-accent text-3xl md:text-4xl"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <!-- Equipos -->
+                <div class="bg-cardBg rounded-2xl p-8 border border-white/5 shadow-lg hover:border-white/20 transition">
+                    <h3 class="font-orbitron text-2xl font-bold text-white mb-6 flex items-center gap-3 border-b border-white/10 pb-4">
+                        <span class="text-accentPurple">🛡️</span> Historial de Equipos
+                    </h3>
+                    <div id="pro-teams-list" class="space-y-3">
+                        <!-- Se inyecta por JS -->
+                    </div>
+                </div>
+
+                <!-- Redes Sociales -->
+                <div class="bg-cardBg rounded-2xl p-8 border border-white/5 shadow-lg hover:border-accent/30 transition">
+                    <h3 class="font-orbitron text-2xl font-bold text-white mb-6 flex items-center gap-3 border-b border-white/10 pb-4">
+                        <span class="text-accent">🌐</span> Redes Sociales
+                    </h3>
+                    <div id="pro-socials-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Se inyecta por JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const gamesData = [
+            {
+                id: 'valorant',
+                name: 'Valorant',
+                image: 'https://www.riotgames.com/darkroom/1200/1dbd7211e78ce5faa7a8af9d10afad47:2b5979e3922758399ba389561e797919/ps-f2p-val-console-launch-16x9.jpg', 
+                desc: 'Shooter táctico donde la precisión y el uso de habilidades definen la victoria.',
+                difficulty: 4, practiceTime: '2 horas / día',
+                warmup: ['Rutina Miyagi: Deathmatch solo siguiendo cabezas sin disparar al instante.', 'Aim Lab: Gridshot y Sixshot para microajustes.', 'Galería de tiro: Práctica de strafe en el campo con bots en difícil.'],
+                mechanics: ['Counter-strafe: Soltar tecla de movimiento y disparar para 100% precisión.', 'Crosshair Placement: Mantén siempre la mira a la altura de la cabeza.', 'Gestión de economía grupal y rotaciones rápidas.'],
+                optimization: ['Activa NVIDIA Reflex Low Latency (On + Boost).', 'Todo en Bajo, desactiva Bloom y Distorsión.', 'Juega en Pantalla Completa Exclusiva para menor Input Lag.'],
+                pros: [
+                    { name: 'TenZ', earnings: '$200,000+', stat: 'Aim Demon / Headshot 32%' },
+                    { name: 'Aspas', earnings: '$300,000+', stat: 'Mejor Entry Fragger Mundial' }
+                ],
+                videos: [
+                    { title: 'Guía Definitiva de Crosshair Placement', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+                    { title: 'Uso de habilidades para Entry', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'cs2',
+                name: 'Counter-Strike 2',
+                image: 'https://cdn.akamai.steamstatic.com/steam/apps/730/capsule_616x353.jpg',
+                desc: 'El rey de los shooters tácticos. Pura puntería, físicas de humo dinámicas y estrategias milimétricas.',
+                difficulty: 5, practiceTime: '3 horas / día',
+                warmup: ['Fast Aim en mapas workshop dedicados.', 'Servidores comunitarios de Retakes y Free For All.', 'Práctica de control de Spray (AK-47 / M4A4).'],
+                mechanics: ['Jiggle Peeking rápido para obtener info sin morir.', 'Lineups de utilidades esenciales (Humos de Mirage/Inferno).', 'Trade Kills sistemáticos (nunca ir solo a morir).'],
+                optimization: ['Juega en 4:3 estirado (ej. 1280x960) para ensanchar modelos.', 'Sombras en Alto/Globales para ver sombras de enemigos en esquinas.', 'Configuración de Autoexec para rate y red.'],
+                pros: [
+                    { name: 's1mple', earnings: '$1.7M+', stat: 'El GOAT Innegable' },
+                    { name: 'ZywOo', earnings: '$1.1M+', stat: 'Game Sense Impecable' }
+                ],
+                videos: [
+                    { title: 'Dominando el Spray Control en CS2', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'league-of-legends',
+                name: 'League of Legends',
+                image: 'https://cloudfront-us-east-1.images.arcpublishing.com/infobae/CNTWUAMXZRF3BPIYPCNPFHOMJQ.jpg', 
+                desc: 'MOBA que requiere mecánicas, visión de mapa y un profundo conocimiento de los matchups.',
+                difficulty: 5, practiceTime: '3 - 4 horas / día',
+                warmup: ['10 mins en Herramienta de Práctica solo haciendo Lasthit sin habilidades.', 'Combos rápidos de tu campeón principal.', 'VOD Review propio de la última derrota.'],
+                mechanics: ['Kiting perfecto (Orb walking / Attack Move Click).', 'Control de oleadas (Freeze, Slow push, Crash).', 'Tracking mental de la ruta del jungla rival.'],
+                optimization: ['Cámara desbloqueada obligatoria (usa la Barra Espaciadora para centrar).', 'Hechizo rápido (Quick Cast) en todo.', 'Sin V-Sync para la menor latencia de clics.'],
+                pros: [
+                    { name: 'Faker', earnings: '$1.5M+', stat: '4x Campeón del Mundo' },
+                    { name: 'Chovy', earnings: '$800K+', stat: 'El Rey del CS (Farm)' }
+                ],
+                videos: [
+                    { title: 'Guía de Control de Oleadas (Macro)', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+                    { title: 'Kiting y Mecánicas de Combate', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'fortnite',
+                name: 'Fortnite',
+                image: 'https://i.ytimg.com/vi/adGdyCdvKz4/maxresdefault.jpg',
+                desc: 'Combates Battle Royale donde debes construir, editar y disparar en fracciones de segundo.',
+                difficulty: 5, practiceTime: '2.5 horas / día',
+                warmup: ['Free Build para calentar la memoria muscular de las manos.', 'Mapas de Piece Control y Edit Timing (Raider464).', 'Boxfights 1v1 para entrar en calor de combate cercano.'],
+                mechanics: ['Piece Control predictivo (encerrar al enemigo antes de que llegue).', 'Right Hand Peeks (Pico por la derecha) constantes.', 'Scroll Wheel Reset (Reset de edición en la rueda del ratón).'],
+                optimization: ['Modo Rendimiento (Performance Mode).', 'Distancia de visión Cerca, mallas de construcción Bajas.', 'Polling rate del ratón a 1000Hz mínimo.'],
+                pros: [
+                    { name: 'Bugha', earnings: '$3.5M+', stat: 'World Cup Solo Champion' },
+                    { name: 'Mero', earnings: '$700K+', stat: 'Mejor Jugador de Mando' }
+                ],
+                videos: [
+                    { title: 'Domina el Piece Control en 10 Minutos', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'rocket-league',
+                name: 'Rocket League',
+                image: 'https://cdn1.epicgames.com/offer/9773aa1aa54f4f7b80e44bef04986cea/EGS_RocketLeague_PsyonixLLC_S1_2560x1440-1a37e26b20fb4f3ebd825e64bc7914eb',
+                desc: 'Fútbol con coches y físicas complejas. Tiene una de las curvas de aprendizaje más altas de los E-Sports.',
+                difficulty: 5, practiceTime: '2 horas / día',
+                warmup: ['Juego Libre (Freeplay) golpeando el balón lo más fuerte posible.', 'Packs de entrenamiento de defensa en el Backboard.', 'Mapas de anillos (Rings) para control aéreo.'],
+                mechanics: ['Half-flip fluido para giros de 180 grados instantáneos.', 'Fast Aerials saltando doble sin hacer backflip por error.', 'Air Roll Left/Right (Rodar en el aire) para microajustes y potencia.'],
+                optimization: ['FOV (Campo de Visión) 110, Distancia 270.', 'Desactiva la Agitación de Cámara (Camera Shake).', 'Ajusta la Deadzone del mando para reaccionar antes.'],
+                pros: [
+                    { name: 'Zen', earnings: '$300K+', stat: 'Mecánicas Revolucionarias' },
+                    { name: 'Vatira', earnings: '$400K+', stat: 'Defensa Impenetrable' }
+                ],
+                videos: [
+                    { title: 'Aprende a hacer Aerials con Precisión', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+                    { title: 'Rotaciones Avanzadas en 3v3', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'overwatch-2',
+                name: 'Overwatch 2',
+                image: 'https://i.ytimg.com/vi/nzIykzkCZAo/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLD8rhZn6cGkKW_MBfyhytaCmxd3Cw',
+                desc: 'Hero shooter enfocado en la sinergia extrema de equipo, gestión de recursos y Ultimates.',
+                difficulty: 4, practiceTime: '2 horas / día',
+                warmup: ['Código de Workshop VAXTA para tracking de modelos.', 'Deathmatch o Tryhard FFA para duelos 1v1.', 'Escenarios de Tracking puro en KovaaK/Aim Lab.'],
+                mechanics: ['Tracking de Ultimates enemigas (Saber qué van a usar).', 'Jugar siempre alrededor de coberturas naturales (Corners).', 'Focus fire coordinado en objetivos desposicionados.'],
+                optimization: ['NVIDIA Reflex On + Boost.', 'Detalles de efectos en Bajo para limpiar la pantalla de distracciones visuales.', 'Render Scale 100% o ligeramente menor para estabilizar FPS en Teamfights.'],
+                pros: [
+                    { name: 'Proper', earnings: '$200K+', stat: 'OWL MVP / Tracer God' },
+                    { name: 'Lip', earnings: '$300K+', stat: 'Hitscan Insuperable' }
+                ],
+                videos: [
+                    { title: 'Mejora tu Game Sense y Posicionamiento', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'rainbow-six',
+                name: 'Rainbow Six Siege',
+                image: 'https://cdn.akamai.steamstatic.com/steam/apps/359550/capsule_616x353.jpg',
+                desc: 'Shooter táctico extremo con muertes súbitas. Entornos destructibles, verticalidad y droning profundo.',
+                difficulty: 5, practiceTime: '3 horas / día',
+                warmup: ['Target Drill en modo Headshot Only.', 'Arcade (Free For All) para afinar reflejos.', 'Aprender y memorizar llamadas (Callouts) en mapas personalizados.'],
+                mechanics: ['Quick Peeking (Shaiiko peek) para tomar información sin exponerse.', 'Conservación y colocación de drones iniciales.', 'Presión vertical rompiendo suelos o techos sobre el sitio de bomba.'],
+                optimization: ['Relación de aspecto 4:3 o 16:10 para ensanchar a los operadores.', 'FOV entre 84 y 90 dependiendo de tu estilo.', 'Sombras en Medio (evita bajo) para detectar sombras de enemigos proyectadas.'],
+                pros: [
+                    { name: 'Beaulo', earnings: '$400K+', stat: 'Inventor del Quick Peek' },
+                    { name: 'Shaiiko', earnings: '$500K+', stat: 'Aim Mecánico Perfecto' }
+                ],
+                videos: [
+                    { title: 'Guía de Quick Peeking y Droning', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+                    { title: 'Defensa de Sitios y Verticalidad', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'street-fighter-6',
+                name: 'Street Fighter 6',
+                image: 'https://cdn.akamai.steamstatic.com/steam/apps/1364780/capsule_616x353.jpg',
+                desc: 'El pináculo actual de los juegos de lucha. Domina el espaciado, los mind games y los reflejos instantáneos.',
+                difficulty: 5, practiceTime: '2 horas / día',
+                warmup: ['Repasar combos de castigo (BnB) en Modo Entrenamiento.', 'Práctica exhaustiva de Anti-Airs contra saltos del bot.', 'Entrenar Hit Confirms con el bot en bloqueo aleatorio.'],
+                mechanics: ['Drive Rush instantáneo para extender presión.', 'Footsies y Whiff Punishing (Golpear la extremidad expuesta del rival al fallar).', 'Perfect Parries en momentos predecibles del rival.'],
+                optimization: ['Juega en un Monitor de 144Hz+ para el menor Input Lag.', 'Juega con Cable Ethernet obligatoriamente (Cero WiFi).', 'Desactiva V-Sync dentro de los ajustes del juego.'],
+                pros: [
+                    { name: 'MenaRD', earnings: '$300K+', stat: '2x Capcom Cup Champ' },
+                    { name: 'AngryBird', earnings: '$150K+', stat: 'Evo Champion' }
+                ],
+                videos: [
+                    { title: 'Fundamentos de Footsies y Espaciado', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'smash-bros',
+                name: 'Super Smash Bros. Ultimate',
+                image: 'https://assets.nintendo.com/image/upload/c_fill,w_1200/q_auto:best/f_auto/dpr_2.0/store/software/switch/70010000012332/ac4d1fc9824876ce756406f0525d50c57ded4b2a666f6dfe40a6ac5c3563fad9',
+                desc: 'El platform fighter definitivo. Movimiento libre, porcentajes de daño y combate letal fuera de la plataforma.',
+                difficulty: 4, practiceTime: '2 horas / día',
+                warmup: ['Saltos cortos (Short hops) y caídas rápidas (Fast falls) limpios.', 'Practicar múltiples rutas de recuperación desde abajo y los lados.', 'Combos verdaderos desde agarres al 0% de daño.'],
+                mechanics: ['Directional Influence (DI) para sobrevivir a golpes letales.', 'Edge Guarding agresivo (matar al rival cuando intenta volver al escenario).', 'Teching en las paredes y en el suelo para evitar el rebote mortal.'],
+                optimization: ['Usa un Adaptador LAN oficial de Nintendo (No uses WiFi).', 'Mapea los botones para que te sea fácil saltar y atacar simultáneamente.', 'Juega en un monitor con bajo input lag o TV en Modo Juego.'],
+                pros: [
+                    { name: 'MkLeo', earnings: '$300K+', stat: 'El GOAT de Ultimate' },
+                    { name: 'Sparg0', earnings: '$200K+', stat: 'Agresividad y Spacing' }
+                ],
+                videos: [
+                    { title: 'Cómo sobrevivir más usando DI y Teching', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+                    { title: 'Edge Guarding Avanzado', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'warzone',
+                name: 'Call of Duty: Warzone',
+                image: 'https://cdn.akamai.steamstatic.com/steam/apps/1938090/capsule_616x353.jpg',
+                desc: 'Battle Royale frenético. Action-packed, tracking implacable y movimiento veloz de la saga Call of Duty.',
+                difficulty: 3, practiceTime: '1.5 horas / día',
+                warmup: ['Rutinas de Tracking en KovaaK / Aim Lab.', 'Caer en mapas pequeños (Resurgence) modo agresivo para entrar en calor.', 'Partidas privadas con Bots al 250hp de vida en MW3.'],
+                mechanics: ['Slide Cancelling continuo para moverte por el mapa y romper cámaras.', 'Centering (Centro de mira) perfecto antes de apuntar y girar esquinas.', 'Drop Shot y Jump Shot en combates cerrados.'],
+                optimization: ['Sube el FOV a 110-120 para ver más información y que el retroceso visual parezca menor.', 'Si juegas mando: Aim Assist en Tipo Default o Black Ops, curva Dinámica.', 'FidelityFX CAS activado al 100% para máxima nitidez visual.'],
+                pros: [
+                    { name: 'Biffle', earnings: '$500K+', stat: 'Aim Assist Perfecto' },
+                    { name: 'Aydan', earnings: '$400K+', stat: 'Récords de Eliminaciones' }
+                ],
+                videos: [
+                    { title: 'Guía de Slide Cancel y Movimiento Avanzado', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            },
+            {
+                id: 'marvel-rivals',
+                name: 'Marvel Rivals',
+                image: 'https://cdn.akamai.steamstatic.com/steam/apps/2767030/capsule_616x353.jpg',
+                desc: 'Hero shooter en 3ª persona. Sinergias heroicas explosivas y destrucción táctica de mapas.',
+                difficulty: 3, practiceTime: '1.5 horas / día',
+                warmup: ['Práctica de apuntado con proyectiles predictivos.', 'Quick play enfocado en aprender memoria muscular de héroes nuevos.', 'Revisión constante de las notas de los parches.'],
+                mechanics: ['Sinergias Team-Up Abilities (Ataques combinados).', 'Destrucción táctica de coberturas del mapa para exponer enemigos.', 'Rotaciones verticales rápidas usando vuelo o escalada.'],
+                optimization: ['Usa DLSS o FSR en modo Rendimiento para mapas cargados.', 'Baja la calidad de las partículas para ver a través de las Ultimates.', 'Ajusta la sensibilidad por héroe (Ej: Alta para melee, baja para Hitscan).'],
+                pros: [
+                    { name: 'Seagull', earnings: 'TBD', stat: 'Pionero de Hero Shooters' },
+                    { name: 'Necros', earnings: 'TBD', stat: 'Mecánicas de Flanqueo' }
+                ],
+                videos: [
+                    { title: 'Mejores Team-Ups y Sinergias', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+                ]
+            }
+        ];
+
+        // Si la imagen falla por bloqueos de terceros, usamos onerror en el HTML
+        const proPlayersData = [
+            { 
+                name: 'Faker', game: 'League of Legends', earnings: '$1.5M+', stat: 'GOAT Indiscutible', 
+                image: 'https://cms.esports.com/wp-content/uploads/2021/01/Faker-1.jpg',
+                teams: ['T1 (2013 - Presente)'],
+                socials: [{platform: 'Twitch', url: '#'}, {platform: 'Twitter / X', url: '#'}]
+            },
+            { 
+                name: 's1mple', game: 'Counter-Strike', earnings: '$1.7M+', stat: 'Dios del AWP', 
+                image: 'https://img-cdn.hltv.org/playerbodyshot/Bv-u3K3H9K60o4P1E4oW-m.png?ixlib=java-2.1.0&w=400',
+                teams: ['Natus Vincere (2016 - Presente)', 'Team Liquid (2016)'],
+                socials: [{platform: 'Twitch', url: '#'}, {platform: 'Instagram', url: '#'}]
+            },
+            { 
+                name: 'TenZ', game: 'Valorant', earnings: '$200K+', stat: 'Aim Demon', 
+                image: 'https://owcdn.net/img/6416801124b89.png',
+                teams: ['Sentinels (2021 - Presente)', 'Cloud9 (2020)'],
+                socials: [{platform: 'YouTube', url: '#'}, {platform: 'Twitch', url: '#'}]
+            },
+            { 
+                name: 'Bugha', game: 'Fortnite', earnings: '$3.5M+', stat: 'World Cup Winner', 
+                image: 'https://estnn.com/wp-content/uploads/2019/07/bugha-1024x576.jpg',
+                teams: ['Dignitas (2023 - Presente)', 'Sentinels (2019 - 2022)'],
+                socials: [{platform: 'Twitch', url: '#'}, {platform: 'YouTube', url: '#'}]
+            },
+            { 
+                name: 'MkLeo', game: 'Smash Ultimate', earnings: '$300K+', stat: 'Rey del Spacing', 
+                image: 'https://estnn.com/wp-content/uploads/2020/02/mkleo-1024x576.jpg',
+                teams: ['Luminosity Gaming (2023 - Presente)', 'T1 (2020 - 2023)', 'Echo Fox (2017 - 2019)'],
+                socials: [{platform: 'Twitter / X', url: '#'}, {platform: 'Twitch', url: '#'}]
+            },
+            { 
+                name: 'ZywOo', game: 'Counter-Strike', earnings: '$1.1M+', stat: 'Game Sense Puro', 
+                image: 'https://img-cdn.hltv.org/playerbodyshot/O2f0vj3n6nC5G-m8eN9C-Q.png?ixlib=java-2.1.0&w=400',
+                teams: ['Team Vitality (2018 - Presente)'],
+                socials: [{platform: 'Twitter / X', url: '#'}, {platform: 'Instagram', url: '#'}]
+            },
+            { 
+                name: 'Zen', game: 'Rocket League', earnings: '$300K+', stat: 'Mecánicas Alien', 
+                image: 'https://estnn.com/wp-content/uploads/2023/08/Zen-Rocket-League-1.jpg',
+                teams: ['Team Vitality (2023 - Presente)'],
+                socials: [{platform: 'Twitch', url: '#'}, {platform: 'Twitter / X', url: '#'}]
+            },
+            { 
+                name: 'Beaulo', game: 'Rainbow Six', earnings: '$400K+', stat: 'Creador del Quick Peek', 
+                image: 'https://cdn.siege.gg/img/players/beaulo.jpg',
+                teams: ['DarkZero Esports (2024 - Presente)', 'TSM (2019 - 2023)'],
+                socials: [{platform: 'YouTube', url: '#'}, {platform: 'Twitch', url: '#'}]
+            },
+            { 
+                name: 'ImperialHal', game: 'Apex Legends', earnings: '$700K+', stat: 'El CEO IGL', 
+                image: 'https://esports.gg/wp-content/uploads/2023/07/21051515/imperialhal-apex-legends.jpg',
+                teams: ['Team Falcons (2024 - Presente)', 'TSM (2019 - 2024)'],
+                socials: [{platform: 'Twitch', url: '#'}, {platform: 'YouTube', url: '#'}]
+            },
+            { 
+                name: 'MenaRD', game: 'Street Fighter 6', earnings: '$300K+', stat: 'Campeón Capcom', 
+                image: 'https://estnn.com/wp-content/uploads/2023/02/menard.jpg',
+                teams: ['Bandits (2020 - Presente)'],
+                socials: [{platform: 'Twitter / X', url: '#'}, {platform: 'Twitch', url: '#'}]
+            },
+            { 
+                name: 'Proper', game: 'Overwatch 2', earnings: '$200K+', stat: 'Tracer Letal', 
+                image: 'https://images.blz-contentstack.com/v3/assets/blt321317473c90505c/blt438f6bdf67b4578b/Proper.jpg',
+                teams: ['San Francisco Shock (2022 - 2023)', 'O2 Blast (2020 - 2021)'],
+                socials: [{platform: 'Twitter / X', url: '#'}, {platform: 'Instagram', url: '#'}]
+            },
+            { 
+                name: 'Scump', game: 'Call of Duty', earnings: '$1.2M+', stat: 'El Rey', 
+                image: 'https://estnn.com/wp-content/uploads/2020/01/scump.jpg',
+                teams: ['OpTic Texas (2021 - 2023)', 'Chicago Huntsmen (2019 - 2020)', 'OpTic Gaming (2012 - 2019)'],
+                socials: [{platform: 'YouTube', url: '#'}, {platform: 'Twitter / X', url: '#'}]
+            }
+        ];
+
+        let isDraggingCarousel = false;
+
+        function renderGames() {
+            const grid = document.getElementById('games-grid');
+            grid.innerHTML = gamesData.map(game => `
+                <div onclick="openGame('${game.id}')" class="game-card-hover bg-cardBg rounded-2xl border border-white/5 cursor-pointer relative overflow-hidden group h-[340px]">
+                    <img src="${game.image}" alt="${game.name}" class="w-full h-[200px] object-cover border-b border-white/10 group-hover:scale-105 transition duration-500">
+                    <div class="p-5 relative z-10 bg-cardBg">
+                        <h3 class="font-orbitron font-bold text-xl text-white mb-2 group-hover:text-accent transition">${game.name}</h3>
+                        <div class="flex items-center gap-2 mb-2 text-sm">
+                            <span class="text-accent">${'★'.repeat(game.difficulty)}<span class="text-white/20">${'★'.repeat(5 - game.difficulty)}</span></span>
+                            <span class="text-textMuted text-xs font-medium px-2 py-0.5 bg-white/5 rounded border border-white/5">${game.practiceTime}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="game-details-overlay absolute inset-0 bg-[#050505]/95 backdrop-blur-md p-6 flex flex-col justify-center text-center z-20">
+                        <h4 class="font-orbitron text-accent font-bold text-xl mb-3">${game.name}</h4>
+                        <p class="text-sm text-gray-300 leading-relaxed mb-4">${game.desc}</p>
+                        <span class="inline-block border border-white/10 py-2 px-4 rounded-full text-xs text-white/70 font-bold uppercase tracking-widest mx-auto group-hover:bg-white/10 transition">Ver Guía Completa</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderProPlayers() {
+            const carousel = document.getElementById('hall-of-fame-carousel');
+            carousel.innerHTML = proPlayersData.map((pro, index) => `
+                <!-- Cartas Rectangulares de Colección -->
+                <div class="pro-card min-w-[280px] w-[280px] h-[400px] flex-shrink-0 snap-center relative rounded-2xl overflow-hidden cursor-pointer group shadow-2xl transition-all duration-100 cursor-grab" id="pro-card-${index}" onclick="handleProClick(${index}, event)">
+                    
+                    <!-- Imagen de Fondo. Si el servidor de la foto la bloquea, mostramos un fallback bonito en verde neón -->
+                    <img src="${pro.image}" alt="${pro.name}" onerror="this.src='https://placehold.co/400x600/151515/00ff88?text=${pro.name}'" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter brightness-[0.6] group-hover:brightness-100">
+                    
+                    <!-- Degradado para legibilidad -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent opacity-90 group-hover:opacity-70 transition-opacity duration-300"></div>
+                    
+                    <!-- Textos -->
+                    <div class="absolute bottom-0 left-0 w-full p-6 flex flex-col justify-end h-full">
+                        <div class="transform translate-y-6 group-hover:translate-y-0 transition-transform duration-300">
+                            <p class="text-xs text-accent font-bold uppercase tracking-widest mb-1 shadow-black drop-shadow-md">${pro.game}</p>
+                            <h4 class="font-orbitron font-black text-4xl text-white mb-4 drop-shadow-lg">${pro.name}</h4>
+                            
+                            <!-- Stats Ocultas que suben al hacer Hover -->
+                            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75 bg-[#050505]/80 backdrop-blur-sm p-4 rounded-xl border border-white/10">
+                                <div class="flex justify-between items-center text-sm border-b border-white/10 pb-2 mb-2">
+                                    <span class="text-textMuted">Ganancias:</span>
+                                    <strong class="text-accent text-lg">${pro.earnings}</strong>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-textMuted">Habilidad Clave:</span>
+                                    <strong class="text-white">${pro.stat}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brillo de Borde Superior -->
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                </div>
+            `).join('');
+        }
+
+        function setupCarouselAnimation() {
+            const carousel = document.getElementById('hall-of-fame-carousel');
+            const scrollAmount = 300; 
+
+            document.getElementById('next-pro').addEventListener('click', () => {
+                carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            });
+            document.getElementById('prev-pro').addEventListener('click', () => {
+                carousel.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            });
+
+            // Motor de Efecto Coverflow 3D
+            const updateEffects = () => {
+                const cards = carousel.querySelectorAll('.pro-card');
+                const centerOfContainer = carousel.getBoundingClientRect().left + (carousel.offsetWidth / 2);
+
+                cards.forEach(card => {
+                    const cardCenter = card.getBoundingClientRect().left + (card.offsetWidth / 2);
+                    const distance = centerOfContainer - cardCenter;
+                    const maxDistance = carousel.offsetWidth / 1.5; 
+                    
+                    // Distancia normalizada (-1 a 1)
+                    let normalizedDistance = distance / maxDistance; 
+                    const clamped = Math.max(-1, Math.min(1, normalizedDistance));
+                    
+                    // Matemáticas para rotación y escala
+                    const rotateY = clamped * 45; // Rotación de hasta 45 grados
+                    const scale = 1 - Math.abs(clamped) * 0.15; // Reducir tamaño a los lados
+                    
+                    card.style.transform = `rotateY(${rotateY}deg) scale(${scale})`;
+                    card.style.zIndex = Math.round((1 - Math.abs(clamped)) * 100);
+                    
+                    // Oscurecer las cartas que no están en el centro
+                    if(Math.abs(clamped) > 0.15) {
+                        card.style.filter = `brightness(${1 - (Math.abs(clamped) * 0.5)}) blur(${Math.abs(clamped) * 2}px)`;
+                    } else {
+                        card.style.filter = 'brightness(1) blur(0px)';
+                    }
+                });
+            };
+
+            carousel.addEventListener('scroll', updateEffects);
+            
+            // Centrar la primera carta al cargar
+            setTimeout(() => {
+                const firstCard = carousel.querySelector('.pro-card');
+                if(firstCard) {
+                    const padding = (carousel.offsetWidth / 2) - (firstCard.offsetWidth / 2);
+                    carousel.style.paddingLeft = `${padding}px`;
+                    carousel.style.paddingRight = `${padding}px`;
+                    updateEffects();
+                }
+            }, 100);
+            
+            window.addEventListener('resize', () => {
+                 setTimeout(updateEffects, 100);
+            });
+
+            // Lógica para arrastrar el carrusel con el mouse
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            carousel.addEventListener('mousedown', (e) => {
+                isDown = true;
+                isDraggingCarousel = false; // Reiniciamos el estado de arrastre
+                carousel.classList.add('cursor-grabbing');
+                startX = e.pageX - carousel.offsetLeft;
+                scrollLeft = carousel.scrollLeft;
+            });
+
+            carousel.addEventListener('mouseleave', () => {
+                isDown = false;
+                carousel.classList.remove('cursor-grabbing');
+            });
+
+            carousel.addEventListener('mouseup', () => {
+                isDown = false;
+                carousel.classList.remove('cursor-grabbing');
+            });
+
+            carousel.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - carousel.offsetLeft;
+                const walk = (x - startX) * 2; // Multiplicador de velocidad de arrastre
+                
+                // Si el mouse se mueve más de 5 píxeles, lo consideramos un arrastre, no un clic
+                if (Math.abs(walk) > 5) {
+                    isDraggingCarousel = true;
+                }
+                
+                carousel.scrollLeft = scrollLeft - walk;
+            });
+        }
+
+        function handleProClick(index, event) {
+            // Si el usuario estaba arrastrando el carrusel, evitamos que se dispare el clic
+            if (isDraggingCarousel) {
+                event.preventDefault();
+                return;
+            }
+            openProDetail(index);
+        }
+
+        function openProDetail(index) {
+            const pro = proPlayersData[index];
+            if (!pro) return;
+
+            document.getElementById('pro-detail-image').src = pro.image;
+            document.getElementById('pro-detail-name').innerText = pro.name;
+            document.getElementById('pro-detail-game').innerText = pro.game;
+            document.getElementById('pro-detail-stat-text').innerText = pro.stat;
+            document.getElementById('pro-detail-earnings').innerText = pro.earnings;
+
+            // Rellenar historial de equipos
+            const teamsList = document.getElementById('pro-teams-list');
+            teamsList.innerHTML = pro.teams.map(team => `
+                <div class="bg-black/30 p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                    <span class="text-accent text-xl">▪</span>
+                    <span class="text-white font-medium">${team}</span>
+                </div>
+            `).join('');
+
+            // Rellenar redes sociales
+            const socialsList = document.getElementById('pro-socials-list');
+            socialsList.innerHTML = pro.socials.map(social => `
+                <a href="${social.url}" target="_blank" class="bg-black/30 hover:bg-white/10 transition p-4 rounded-xl border border-white/5 flex items-center justify-between group cursor-pointer">
+                    <span class="text-gray-300 group-hover:text-white font-bold">${social.platform}</span>
+                    <span class="text-accent group-hover:translate-x-1 transition-transform">→</span>
+                </a>
+            `).join('');
+
+            showView('pro-detail-view');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            if(viewId === 'home-view') {
+                document.getElementById('btn-back').classList.add('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                document.getElementById('btn-back').classList.remove('hidden');
+            }
+        }
+
+        function openGame(gameId) {
+            const game = gamesData.find(g => g.id === gameId);
+            if (!game) return;
+
+            document.getElementById('detail-title').innerText = game.name;
+            document.getElementById('detail-desc').innerText = game.desc;
+            document.getElementById('detail-banner').style.backgroundImage = `url('${game.image}')`;
+            
+            const fillList = (id, items) => {
+                document.getElementById(id).innerHTML = items.map(i => `
+                    <li class="flex items-start gap-3">
+                        <span class="text-accent mt-1">▸</span>
+                        <span class="leading-relaxed text-gray-300">${i}</span>
+                    </li>
+                `).join('');
+            };
+            
+            fillList('guide-warmup', game.warmup);
+            fillList('guide-mechanics', game.mechanics);
+            fillList('guide-optimization', game.optimization);
+
+            const prosGrid = document.getElementById('game-pros-grid');
+            if (game.pros && game.pros.length > 0) {
+                prosGrid.innerHTML = game.pros.map(pro => `
+                    <div class="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center justify-between shadow-2xl hover:border-accent transition group">
+                        <div>
+                            <h4 class="font-orbitron text-2xl font-bold text-white group-hover:text-accent transition">${pro.name}</h4>
+                            <p class="text-gray-400 text-sm mt-1 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-accentPurple"></span> ${pro.stat}
+                            </p>
+                        </div>
+                        <div class="text-right bg-white/5 px-4 py-2 rounded-lg">
+                            <span class="text-xs text-textMuted uppercase font-bold tracking-wider block mb-0.5">Ganancias</span>
+                            <span class="font-black text-accentPurple text-xl">${pro.earnings}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const videosGrid = document.getElementById('game-videos-grid');
+            if (game.videos && game.videos.length > 0) {
+                videosGrid.innerHTML = game.videos.map(video => `
+                    <div class="bg-[#111111] rounded-2xl overflow-hidden border border-white/5 shadow-2xl group hover:-translate-y-2 transition duration-300">
+                        <div class="relative pb-[56.25%] h-0 bg-black">
+                            <!-- Nota: usamos un embed genérico de YouTube a modo de ejemplo -->
+                            <iframe src="${video.url}" class="absolute top-0 left-0 w-full h-full border-0 opacity-80 group-hover:opacity-100 transition" allowfullscreen></iframe>
+                        </div>
+                        <div class="p-5 border-t border-white/5 group-hover:border-accent transition">
+                            <h4 class="font-inter text-sm font-semibold text-gray-300 group-hover:text-white transition">${video.title}</h4>
+                            <span class="inline-block mt-3 text-xs text-accent bg-accent/10 px-2 py-1 rounded font-bold uppercase">Ver Guía Completa</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            showView('game-detail-view');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.onload = () => {
+            renderGames();
+            renderProPlayers();
+            setupCarouselAnimation();
+        };
+    </script>
+</body>
+</html>
